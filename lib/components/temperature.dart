@@ -43,6 +43,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight  = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -50,41 +51,43 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       backgroundColor: blackColor,
-      body: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.all(screenWidth * 0.06),
-            alignment: Alignment.centerLeft,
-            child: GradientText(
-              'Temperature vs Time',
-              colors: const [Colors.red, Colors.redAccent, Colors.purple],
-              style: TextStyle(
-                  fontFamily: 'Lexend',
-                  fontSize: screenWidth * 0.07,
-                  fontWeight: FontWeight.w500),
-            ),
-          ),
-          SizedBox(height: screenWidth * 0.1),
-
-          // graph
-          Container(
-            color: Colors.white,
-            margin: const EdgeInsets.all(20),
-            height: 300,
-            child: LineChart(
-              LineChartData(
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: getSpots(),
-                    isCurved: true,
-                    color: Colors.blue,
-                    dotData: const FlDotData(show: true),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.all(screenWidth * 0.06),
+              alignment: Alignment.centerLeft,
+              child: GradientText(
+                'Temperature vs Time',
+                colors: const [Colors.red, Colors.redAccent, Colors.purple],
+                style: TextStyle(
+                    fontFamily: 'Lexend',
+                    fontSize: screenWidth * 0.07,
+                    fontWeight: FontWeight.w500),
               ),
             ),
-          )
-        ],
+            SizedBox(height: screenWidth * 0.1),
+      
+            // graph
+            Container(
+              color: Colors.white,
+              margin: const EdgeInsets.all(20),
+              height: screenHeight * 0.9,
+              child: LineChart(
+                LineChartData(
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: getSpots(),
+                      isCurved: true,
+                      color: Colors.blue,
+                      dotData: const FlDotData(show: true),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

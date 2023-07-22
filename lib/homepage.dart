@@ -110,7 +110,6 @@ class _HomePageState extends State<HomePage> {
                       GradientText('Latest Temperature', colors: const [
                         Colors.red,
                         Colors.redAccent,
-                        Colors.purple
                       ], )
                     ],
                   ),
@@ -132,7 +131,6 @@ class _HomePageState extends State<HomePage> {
                       GradientText('Latest Humidity', colors: const [
                         Colors.red,
                         Colors.redAccent,
-                        Colors.purple
                       ])
                     ],
                   )

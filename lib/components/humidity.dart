@@ -71,7 +71,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              height: 300,
+              height: screenHeight * 0.9,
               child: LineChart(
                 
                 LineChartData(
