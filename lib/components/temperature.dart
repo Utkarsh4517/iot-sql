@@ -78,7 +78,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
                     spots: getSpots(),
                     isCurved: true,
                     color: Colors.blue,
-                    dotData: const FlDotData(show: false),
+                    dotData: const FlDotData(show: true),
                   ),
                 ],
               ),

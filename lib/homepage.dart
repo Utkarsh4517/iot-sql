@@ -1,8 +1,6 @@
 import 'package:feather_icons/feather_icons.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mysql1/mysql1.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:sqltest/components/combined.dart';
 import 'package:sqltest/components/coordinates.dart';
@@ -24,6 +22,14 @@ class _HomePageState extends State<HomePage> {
     var formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
     return formattedDate;
   }
+
+  double latestTemp = 0.0;
+  double latestHumidity = 0.0;
+
+  // get latest temp and humidty
+  var db = MySqlServer();
+  
+
 
   @override
   Widget build(BuildContext context) {

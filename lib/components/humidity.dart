@@ -82,7 +82,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
                       spots: getSpots(),
                       isCurved: true,
                       color: Colors.blue,
-                      dotData: const FlDotData(show: false),
+                      dotData: const FlDotData(show: true),
                     ),
                   ],
                 ),
