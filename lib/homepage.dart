@@ -1,6 +1,7 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:sqltest/components/combined.dart';
 import 'package:sqltest/components/coordinates.dart';
@@ -28,8 +29,42 @@ class _HomePageState extends State<HomePage> {
 
   // get latest temp and humidty
   var db = MySqlServer();
-  
 
+  void getTempData() {
+    db.getConnection().then((conn) {
+      String sql =
+          'select Temperature from IOT order by Timestamp DESC limit 1';
+
+      conn.query(sql).then((results) {
+        for (var row in results) {
+          setState(() {
+            latestTemp = row[0];
+          });
+        }
+      });
+    });
+  }
+
+  void getHumidityData() {
+    db.getConnection().then((conn) {
+      String sql = 'select Humidity from IOT order by Timestamp DESC limit 1';
+
+      conn.query(sql).then((results) {
+        for (var row in results) {
+          setState(() {
+            latestHumidity = row[0];
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    getTempData();
+    getHumidityData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +86,60 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: screenWidth * 0.8),
+            Container(
+              margin: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.04, vertical: screenWidth * 0.1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      CircularPercentIndicator(
+                        radius: 70,
+                        lineWidth: 10,
+                        percent: latestTemp / 100,
+                        progressColor: Colors.blue,
+                        animation: true,
+                        center: GradientText('$latestTemp', colors: const [
+                          Colors.red,
+                          Colors.redAccent,
+                          Colors.purple
+                        ], style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),),
+                      ),
+                      SizedBox(height: screenWidth * 0.05),
+                      GradientText('Latest Temperature', colors: const [
+                        Colors.red,
+                        Colors.redAccent,
+                        Colors.purple
+                      ], )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      CircularPercentIndicator(
+                        radius: 70,
+                        lineWidth: 10,
+                        percent: latestHumidity / 100,
+                        progressColor: Colors.blueAccent,
+                        animation: true,
+                        center: GradientText('$latestHumidity', colors: const [
+                          Colors.red,
+                          Colors.redAccent,
+                          Colors.purple
+                        ], style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),),
+                      ),
+                      SizedBox(height: screenWidth * 0.05),
+                      GradientText('Latest Humidity', colors: const [
+                        Colors.red,
+                        Colors.redAccent,
+                        Colors.purple
+                      ])
+                    ],
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: screenWidth * 0.2),
             const Wrap(
               children: [
                 GraphContainer(
