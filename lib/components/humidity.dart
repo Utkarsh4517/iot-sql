@@ -75,8 +75,8 @@ class _HumidityGraphState extends State<HumidityGraph> {
               child: LineChart(
                 
                 LineChartData(
-                  minY: 30,
-                  maxY: 80,
+                  minY: 20,
+                  maxY: 100,
                   lineBarsData: [
                     LineChartBarData(
                       spots: getSpots(),
