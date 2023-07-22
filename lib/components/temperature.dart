@@ -72,9 +72,11 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              height: screenHeight * 0.9,
+              height: 500,
               child: LineChart(
                 LineChartData(
+                  minY: 0,
+                  maxY: 50,
                   lineBarsData: [
                     LineChartBarData(
                       spots: getSpots(),
