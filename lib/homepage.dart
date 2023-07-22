@@ -1,7 +1,10 @@
+import 'package:feather_icons/feather_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart';
+import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:sqltest/components/graph_containers.dart';
 import 'package:sqltest/server.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,6 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    getCurrentTemp();
     super.initState();
   }
 
@@ -42,6 +46,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // get current temperature on init state
+
+  void getCurrentTemp(){
+    db.getConnection().then((conn){
+      
+    } );
+  }
+
   String formatTimestamp(int unixTimestamp) {
     var dateTime = DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000);
     var formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
@@ -50,32 +62,52 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            
-            Text('temp is $temperature'),
-            ElevatedButton(onPressed: getTemp, child: Text('press')),
-            const SizedBox(height: 50),
+            SizedBox(height: screenWidth * 0.1),
             Container(
-              margin: const EdgeInsets.all(20),
-              height: 300,
-              child: LineChart(
-                LineChartData(
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: getSpots(),
-                      isCurved: true,
-                      color: Colors.blue,
-                      dotData: const FlDotData(show: false),
-                    ),
-                  ],
-                ),
+              margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+              child: GradientText(
+                'Live Environment Data',
+                colors: const [Colors.red, Colors.redAccent, Colors.purple],
+                style: TextStyle(
+                    fontSize: screenWidth * 0.1,
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.bold),
               ),
-            )
+            ),
+
+            SizedBox(height: screenWidth * 0.8),
+
+            const Wrap(
+              children: [
+                GraphContainer(text: 'Temperature', icon: Icons.thermostat, iconColor: Colors.orange),
+                GraphContainer(text: 'Humidity', icon: Icons.thermostat_auto, iconColor: Colors.blue),
+                GraphContainer(text: 'Coordinates', icon: FeatherIcons.barChart2, iconColor: Colors.white),
+                GraphContainer(text: 'Combined', icon: FeatherIcons.monitor, iconColor: Colors.white),
+              ],
+            ),
+            
+            // Container(
+            //   margin: const EdgeInsets.all(20),
+            //   height: 300,
+            //   child: LineChart(
+            //     LineChartData(
+            //       lineBarsData: [
+            //         LineChartBarData(
+            //           spots: getSpots(),
+            //           isCurved: true,
+            //           color: Colors.blue,
+            //           dotData: const FlDotData(show: false),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // )
           ],
         ),
       ),

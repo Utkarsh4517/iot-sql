@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  feather_icons:
+    dependency: "direct main"
+    description:
+      name: feather_icons
+      sha256: "9fe1e52305fc363c3ee08cabaef32526e2e8ce53091c7b70f9c774460a1f03ae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   fl_chart:
     dependency: "direct main"
     description:
@@ -179,6 +187,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
+  simple_gradient_text:
+    dependency: "direct main"
+    description:
+      name: simple_gradient_text
+      sha256: "075a2cbabac021d3713d0d199b2d1b0d40f6293e1e9d37b25e84936ae43c90fa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.4"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -250,3 +266,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=3.0.3 <4.0.0"
+  flutter: ">=2.5.0"

@@ -38,6 +38,8 @@ dependencies:
   mysql1: ^0.20.0
   intl: ^0.18.1
   fl_chart: ^0.63.0
+  simple_gradient_text: ^1.2.4
+  feather_icons: ^1.2.0
 
 dev_dependencies:
   flutter_test:
