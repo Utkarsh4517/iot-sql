@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:sqltest/components/combined.dart';
+import 'package:sqltest/components/coordinates.dart';
 import 'package:sqltest/components/graph_containers.dart';
+import 'package:sqltest/components/humidity.dart';
+import 'package:sqltest/components/temperature.dart';
 import 'package:sqltest/server.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     getCurrentTemp();
+    getTemp();
     super.initState();
   }
 
@@ -85,10 +90,10 @@ class _HomePageState extends State<HomePage> {
 
             const Wrap(
               children: [
-                GraphContainer(text: 'Temperature', icon: Icons.thermostat, iconColor: Colors.orange),
-                GraphContainer(text: 'Humidity', icon: Icons.thermostat_auto, iconColor: Colors.blue),
-                GraphContainer(text: 'Coordinates', icon: FeatherIcons.barChart2, iconColor: Colors.white),
-                GraphContainer(text: 'Combined', icon: FeatherIcons.monitor, iconColor: Colors.white),
+                GraphContainer(text: 'Temperature', icon: Icons.thermostat, iconColor: Colors.orange, containerToLoad: TemperatureGraph()),
+                GraphContainer(text: 'Humidity', icon: Icons.thermostat_auto, iconColor: Colors.blue, containerToLoad: HumidityGraph()),
+                GraphContainer(text: 'Coordinates', icon: FeatherIcons.barChart2, iconColor: Colors.white, containerToLoad: CoordinatesGraph()),
+                GraphContainer(text: 'Combined', icon: FeatherIcons.monitor, iconColor: Colors.white, containerToLoad: CombinedGraph()),
               ],
             ),
             
