@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:sqltest/components/date_picker.dart';
 import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
 
@@ -15,6 +16,9 @@ class _HumidityGraphState extends State<HumidityGraph> {
   // handling database requests
   var db = MySqlServer();
   List<Map<String, dynamic>> humidityData = [];
+
+  DateTime selectedDate = DateTime.now();
+
   void getHumidity() {
     db.getConnection().then((conn) {
       String sql = 'select Timestamp, Humidity from IOT';
@@ -43,7 +47,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-     double screenHeight  = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: blackColor,
@@ -65,15 +69,14 @@ class _HumidityGraphState extends State<HumidityGraph> {
                     fontWeight: FontWeight.w500),
               ),
             ),
-             SizedBox(height: screenWidth * 0.1),
-      
+            SizedBox(height: screenWidth * 0.1),
+
             // graph
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
               height: 500,
               child: LineChart(
-                
                 LineChartData(
                   minY: 20,
                   maxY: 100,
@@ -87,13 +90,31 @@ class _HumidityGraphState extends State<HumidityGraph> {
                   ],
                 ),
               ),
-            )
+            ),
+            DatePickerWidget(
+              onDateChanged: (DateTime date) {
+                // Filter data based on the selected date
+                List<Map<String, dynamic>> filteredData =
+                    humidityData.where((data) {
+                  DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
+                      data['Timestamp'] * 1000);
+                  return dataDate.year == date.year &&
+                      dataDate.month == date.month &&
+                      dataDate.day == date.day;
+                }).toList();
+                setState(() {
+                  selectedDate = date;
+                  humidityData = filteredData;
+                });
+              },
+            ),
           ],
         ),
       ),
     );
   }
-   List<FlSpot> getSpots() {
+
+  List<FlSpot> getSpots() {
     List<FlSpot> spots = [];
     for (int i = 0; i < humidityData.length; i++) {
       double x = i.toDouble(); // Use the index as x-value

@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:sqltest/components/date_picker.dart';
 import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
 
@@ -16,6 +17,8 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
   var db = MySqlServer();
   List<Map<String, dynamic>> xyzData = [];
+
+  DateTime selectedDate = DateTime.now();
 
   void getXyzData() {
     db.getConnection().then((conn) {
@@ -71,7 +74,13 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
             // graph
             SizedBox(height: screenWidth * 0.1),
-            const Text('Blue = X   Red = Y   Green = Z', style: TextStyle(fontFamily: 'Lexend', fontWeight: FontWeight.bold, color: Colors.white),),
+            const Text(
+              'Blue = X   Red = Y   Green = Z',
+              style: TextStyle(
+                  fontFamily: 'Lexend',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
@@ -103,7 +112,24 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                   ],
                 ),
               ),
-            )
+            ),
+
+            DatePickerWidget(
+              onDateChanged: (DateTime date) {
+                // Filter data based on the selected date
+                List<Map<String, dynamic>> filteredData = xyzData.where((data) {
+                  DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
+                      data['Timestamp'] * 1000);
+                  return dataDate.year == date.year &&
+                      dataDate.month == date.month &&
+                      dataDate.day == date.day;
+                }).toList();
+                setState(() {
+                  selectedDate = date;
+                  xyzData = filteredData;
+                });
+              },
+            ),
           ],
         ),
       ),

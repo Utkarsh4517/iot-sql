@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:sqltest/components/date_picker.dart';
 import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
 
@@ -15,6 +16,9 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
   // handling database requests
   var db = MySqlServer();
   List<Map<String, dynamic>> temperatureData = [];
+
+  DateTime selectedDate = DateTime.now();
+
   void getTemp() {
     db.getConnection().then((conn) {
       String sql = 'select Timestamp, Temperature from IOT';
@@ -43,7 +47,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight  = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +71,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
               ),
             ),
             SizedBox(height: screenWidth * 0.1),
-      
+
             // graph
             Container(
               color: Colors.white,
@@ -87,7 +91,24 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
                   ],
                 ),
               ),
-            )
+            ),
+            DatePickerWidget(
+              onDateChanged: (DateTime date) {
+                // Filter data based on the selected date
+                List<Map<String, dynamic>> filteredData =
+                    temperatureData.where((data) {
+                  DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
+                      data['Timestamp'] * 1000);
+                  return dataDate.year == date.year &&
+                      dataDate.month == date.month &&
+                      dataDate.day == date.day;
+                }).toList();
+                setState(() {
+                  selectedDate = date;
+                  temperatureData = filteredData;
+                });
+              },
+            ),
           ],
         ),
       ),
