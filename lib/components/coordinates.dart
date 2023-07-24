@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:sqltest/components/date_picker.dart';
 import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class CoordinatesGraph extends StatefulWidget {
   const CoordinatesGraph({super.key});
@@ -70,7 +73,8 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
         child: Column(
           children: [
             Container(
-              margin: EdgeInsets.all(screenWidth * 0.06),
+              margin: EdgeInsets.all(screenWidth * 0.06)
+                  .copyWith(bottom: screenWidth * 0.01),
               alignment: Alignment.centerLeft,
               child: GradientText(
                 'X - Y - Z vs Time',
@@ -81,7 +85,19 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                     fontWeight: FontWeight.w500),
               ),
             ),
-            SizedBox(height: screenWidth * 0.1),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.all(screenWidth * 0.07)
+                  .copyWith(bottom: 0, top: 0),
+              child: const Text(
+                'Select a date to proceed',
+                style: TextStyle(
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+            SizedBox(height: screenWidth * 0.07),
             Container(
               margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: const Text(
@@ -157,7 +173,9 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
             ),
             DatePickerWidget(
               onDateChanged: (DateTime date) {
+                String formattedDate = DateFormat('yyyy-MM-dd').format(date);
                 getDataForDate(date);
+                _showMessage(context, 'Showing graph for $formattedDate');
               },
             ),
           ],
@@ -200,5 +218,12 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
       spots.add(FlSpot(x, y));
     }
     return spots;
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    showTopSnackBar(
+        animationDuration: const Duration(milliseconds: 500),
+        Overlay.of(context),
+        CustomSnackBar.success(message: message));
   }
 }

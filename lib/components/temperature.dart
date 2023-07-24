@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:sqltest/components/date_picker.dart';
 import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class TemperatureGraph extends StatefulWidget {
   const TemperatureGraph({super.key});
@@ -70,7 +73,8 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
         child: Column(
           children: [
             Container(
-              margin: EdgeInsets.all(screenWidth * 0.06),
+              margin: EdgeInsets.all(screenWidth * 0.06)
+                  .copyWith(bottom: screenWidth * 0.01),
               alignment: Alignment.centerLeft,
               child: GradientText(
                 'Temperature vs Time',
@@ -81,7 +85,19 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
                     fontWeight: FontWeight.w500),
               ),
             ),
-            SizedBox(height: screenWidth * 0.1),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.all(screenWidth * 0.07)
+                  .copyWith(bottom: 0, top: 0),
+              child: const Text(
+                'Select a date to proceed',
+                style: TextStyle(
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+            SizedBox(height: screenWidth * 0.07),
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
@@ -135,7 +151,10 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
             ),
             DatePickerWidget(
               onDateChanged: (DateTime date) {
+                String formattedDate =
+                    DateFormat('yyyy-MM-dd').format(date);
                 getDataForDate(date);
+                _showMessage(context, 'Showing graph for $formattedDate');
               },
             ),
           ],
@@ -158,5 +177,12 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
       spots.add(FlSpot(x, y));
     }
     return spots;
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    showTopSnackBar(
+        animationDuration: const Duration(milliseconds: 500),
+        Overlay.of(context),
+        CustomSnackBar.success(message: message));
   }
 }

@@ -8,6 +8,7 @@ import 'package:sqltest/components/coordinates.dart';
 import 'package:sqltest/components/graph_containers.dart';
 import 'package:sqltest/components/humidity.dart';
 import 'package:sqltest/components/temperature.dart';
+import 'package:sqltest/constants/colors.dart';
 import 'package:sqltest/server.dart';
 
 class HomePage extends StatefulWidget {
@@ -72,97 +73,126 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: screenWidth * 0.1),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-              child: GradientText(
-                'Live Environment Data',
-                colors: const [Colors.red, Colors.redAccent, Colors.purple],
-                style: TextStyle(
-                    fontSize: screenWidth * 0.1,
-                    fontFamily: 'Lexend',
-                    fontWeight: FontWeight.bold),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: screenWidth * 0.1),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                child: GradientText(
+                  'Live Environment Data',
+                  colors: const [Colors.red, Colors.redAccent, Colors.purple],
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.1,
+                      fontFamily: 'Lexend',
+                      fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.04, vertical: screenWidth * 0.1),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04, vertical: screenWidth * 0.1),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Card(
+                      color: darkGreyColor,
+                      child: Padding(
+                        padding: EdgeInsets.all(screenWidth * 0.05),
+                        child: Column(
+                          children: [
+                            CircularPercentIndicator(
+                              radius: 70,
+                              lineWidth: 10,
+                              percent: latestTemp / 100,
+                              progressColor: Colors.blue,
+                              animation: true,
+                              center: GradientText(
+                                '$latestTemp',
+                                colors: const [
+                                  Colors.red,
+                                  Colors.redAccent,
+                                  Colors.purple
+                                ],
+                                style: TextStyle(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(height: screenWidth * 0.05),
+                            GradientText(
+                              'Latest Temperature',
+                              colors: const [
+                                Colors.red,
+                                Colors.redAccent,
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      color: darkGreyColor,
+                      child: Padding(
+                        padding: EdgeInsets.all(screenWidth * 0.05),
+                        child: Column(
+                          children: [
+                            CircularPercentIndicator(
+                              radius: 70,
+                              lineWidth: 10,
+                              percent: latestHumidity / 100,
+                              progressColor: Colors.blueAccent,
+                              animation: true,
+                              center: GradientText(
+                                '$latestHumidity',
+                                colors: const [
+                                  Colors.red,
+                                  Colors.redAccent,
+                                  Colors.purple
+                                ],
+                                style: TextStyle(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(height: screenWidth * 0.05),
+                            GradientText('Latest Humidity', colors: const [
+                              Colors.red,
+                              Colors.redAccent,
+                            ])
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(height: screenWidth * 0.055),
+              const Wrap(
                 children: [
-                  Column(
-                    children: [
-                      CircularPercentIndicator(
-                        radius: 70,
-                        lineWidth: 10,
-                        percent: latestTemp / 100,
-                        progressColor: Colors.blue,
-                        animation: true,
-                        center: GradientText('$latestTemp', colors: const [
-                          Colors.red,
-                          Colors.redAccent,
-                          Colors.purple
-                        ], style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),),
-                      ),
-                      SizedBox(height: screenWidth * 0.05),
-                      GradientText('Latest Temperature', colors: const [
-                        Colors.red,
-                        Colors.redAccent,
-                      ], )
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      CircularPercentIndicator(
-                        radius: 70,
-                        lineWidth: 10,
-                        percent: latestHumidity / 100,
-                        progressColor: Colors.blueAccent,
-                        animation: true,
-                        center: GradientText('$latestHumidity', colors: const [
-                          Colors.red,
-                          Colors.redAccent,
-                          Colors.purple
-                        ], style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),),
-                      ),
-                      SizedBox(height: screenWidth * 0.05),
-                      GradientText('Latest Humidity', colors: const [
-                        Colors.red,
-                        Colors.redAccent,
-                      ])
-                    ],
-                  )
+                  GraphContainer(
+                      text: 'Temperature',
+                      icon: Icons.thermostat,
+                      iconColor: Colors.orange,
+                      containerToLoad: TemperatureGraph()),
+                  GraphContainer(
+                      text: 'Humidity',
+                      icon: Icons.thermostat_auto,
+                      iconColor: Colors.blue,
+                      containerToLoad: HumidityGraph()),
+                  GraphContainer(
+                      text: 'Coordinates',
+                      icon: FeatherIcons.barChart2,
+                      iconColor: Colors.white,
+                      containerToLoad: CoordinatesGraph()),
+                  GraphContainer(
+                      text: 'Combined',
+                      icon: FeatherIcons.monitor,
+                      iconColor: Colors.white,
+                      containerToLoad: CombinedGraph()),
                 ],
               ),
-            ),
-            SizedBox(height: screenWidth * 0.2),
-            const Wrap(
-              children: [
-                GraphContainer(
-                    text: 'Temperature',
-                    icon: Icons.thermostat,
-                    iconColor: Colors.orange,
-                    containerToLoad: TemperatureGraph()),
-                GraphContainer(
-                    text: 'Humidity',
-                    icon: Icons.thermostat_auto,
-                    iconColor: Colors.blue,
-                    containerToLoad: HumidityGraph()),
-                GraphContainer(
-                    text: 'Coordinates',
-                    icon: FeatherIcons.barChart2,
-                    iconColor: Colors.white,
-                    containerToLoad: CoordinatesGraph()),
-                GraphContainer(
-                    text: 'Combined',
-                    icon: FeatherIcons.monitor,
-                    iconColor: Colors.white,
-                    containerToLoad: CombinedGraph()),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
