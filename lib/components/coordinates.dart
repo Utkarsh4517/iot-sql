@@ -16,27 +16,30 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
   // handling database requests
 
   var db = MySqlServer();
-  List<Map<String, dynamic>> xyzData = [];
+  List<Map<String, dynamic>> allData = [];
 
   DateTime selectedDate = DateTime.now();
 
-  void getXyzData() {
+  void getAllData() {
     db.getConnection().then((conn) {
-      String sql = 'SELECT Timestamp, X, Y, Z FROM IOT';
+      String sql = 'SELECT Timestamp, Temperature, Humidity, X, Y, Z FROM IOT';
       conn.query(sql).then((results) {
         List<Map<String, dynamic>> data = [];
         for (var row in results) {
           Map<String, dynamic> rowData = {
             'Timestamp': row['Timestamp'],
+            'Temperature': row['Temperature'],
+            'Humidity': row['Humidity'],
             'X': row['X'],
             'Y': row['Y'],
             'Z': row['Z'],
           };
           data.add(rowData);
         }
+        // new
         data.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
         setState(() {
-          xyzData = data;
+          allData = data;
         });
       });
     });
@@ -44,13 +47,14 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
   @override
   void initState() {
-    getXyzData();
+    getAllData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: blackColor,
@@ -64,7 +68,7 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
               margin: EdgeInsets.all(screenWidth * 0.06),
               alignment: Alignment.centerLeft,
               child: GradientText(
-                'X, Y and Z vs Time',
+                'X - Y - Z vs Time',
                 colors: const [Colors.red, Colors.redAccent, Colors.purple],
                 style: TextStyle(
                     fontFamily: 'Lexend',
@@ -72,20 +76,21 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                     fontWeight: FontWeight.w500),
               ),
             ),
-
-            // graph
             SizedBox(height: screenWidth * 0.1),
-            const Text(
-              'Blue = X   Red = Y   Green = Z',
-              style: TextStyle(
-                  fontFamily: 'Lexend',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+              child: const Text(
+                'Red = X   Green = Y  Orange = Z ',
+                style: TextStyle(
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
             ),
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              height: 500,
+              height: screenHeight * 0.4,
               child: LineChart(
                 LineChartData(
                   titlesData: FlTitlesData(
@@ -112,7 +117,7 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                           showTitles: true,
                           reservedSize: 22,
                           getTitlesWidget: (value, meta) {
-                           return RotatedBox(
+                            return RotatedBox(
                               quarterTurns: 3,
                               child: Text(
                                 formatTimestamp(value.toInt()),
@@ -126,33 +131,29 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                     LineChartBarData(
                       spots: getXSpots(),
                       isCurved: true,
-                      color: Colors
-                          .blue, // You can set different colors for X, Y, and Z lines if you want
+                      color: Colors.red, // Set the color for X line
                       dotData: const FlDotData(show: true),
                     ),
                     LineChartBarData(
                       spots: getYSpots(),
                       isCurved: true,
-                      color: Colors
-                          .red, // You can set different colors for X, Y, and Z lines if you want
+                      color: Colors.green, // Set the color for Y line
                       dotData: const FlDotData(show: true),
                     ),
                     LineChartBarData(
                       spots: getZSpots(),
                       isCurved: true,
-                      color: Colors
-                          .green, // You can set different colors for X, Y, and Z lines if you want
+                      color: Colors.orange, // Set the color for Z line
                       dotData: const FlDotData(show: true),
                     ),
                   ],
                 ),
               ),
             ),
-
             DatePickerWidget(
               onDateChanged: (DateTime date) {
                 // Filter data based on the selected date
-                List<Map<String, dynamic>> filteredData = xyzData.where((data) {
+                List<Map<String, dynamic>> filteredData = allData.where((data) {
                   DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
                       data['Timestamp'] * 1000);
                   return dataDate.year == date.year &&
@@ -161,7 +162,7 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
                 }).toList();
                 setState(() {
                   selectedDate = date;
-                  xyzData = filteredData;
+                  allData = filteredData;
                 });
               },
             ),
@@ -171,7 +172,7 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
     );
   }
 
- String formatTimestamp(int timestamp) {
+  String formatTimestamp(int timestamp) {
     DateTime dt = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     DateTime localTime = dt.toLocal(); // Convert to local time
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
@@ -179,9 +180,9 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
   List<FlSpot> getXSpots() {
     List<FlSpot> spots = [];
-    for (int i = 0; i < xyzData.length; i++) {
-      double x = i.toDouble(); // Use the index as x-value
-      double y = xyzData[i]['X'].toDouble();
+    for (int i = 0; i < allData.length; i++) {
+      double x = allData[i]['Timestamp'].toDouble();
+      double y = allData[i]['X'].toDouble();
       spots.add(FlSpot(x, y));
     }
     return spots;
@@ -189,9 +190,9 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
   List<FlSpot> getYSpots() {
     List<FlSpot> spots = [];
-    for (int i = 0; i < xyzData.length; i++) {
-      double x = i.toDouble(); // Use the index as x-value
-      double y = xyzData[i]['Y'].toDouble();
+    for (int i = 0; i < allData.length; i++) {
+      double x = allData[i]['Timestamp'].toDouble();
+      double y = allData[i]['Y'].toDouble();
       spots.add(FlSpot(x, y));
     }
     return spots;
@@ -199,9 +200,9 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
 
   List<FlSpot> getZSpots() {
     List<FlSpot> spots = [];
-    for (int i = 0; i < xyzData.length; i++) {
-      double x = i.toDouble(); // Use the index as x-value
-      double y = xyzData[i]['Z'].toDouble();
+    for (int i = 0; i < allData.length; i++) {
+      double x = allData[i]['Timestamp'].toDouble();
+      double y = allData[i]['Z'].toDouble();
       spots.add(FlSpot(x, y));
     }
     return spots;
