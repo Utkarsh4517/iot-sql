@@ -34,6 +34,7 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
           };
           data.add(rowData);
         }
+        data.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
         setState(() {
           xyzData = data;
         });
@@ -87,6 +88,40 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
               height: 500,
               child: LineChart(
                 LineChartData(
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                        drawBelowEverything: true,
+                        axisNameSize: 20,
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) {
+                            return RotatedBox(
+                              quarterTurns: 3,
+                              child: Text(
+                                formatTimestamp(value.toInt()),
+                                style: TextStyle(fontSize: screenWidth * 0.015),
+                              ),
+                            );
+                          },
+                        )),
+                    topTitles: AxisTitles(
+                        drawBelowEverything: true,
+                        axisNameSize: 20,
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) {
+                           return RotatedBox(
+                              quarterTurns: 3,
+                              child: Text(
+                                formatTimestamp(value.toInt()),
+                                style: TextStyle(fontSize: screenWidth * 0.015),
+                              ),
+                            );
+                          },
+                        )),
+                  ),
                   lineBarsData: [
                     LineChartBarData(
                       spots: getXSpots(),
@@ -134,6 +169,12 @@ class _CoordinatesGraphState extends State<CoordinatesGraph> {
         ),
       ),
     );
+  }
+
+ String formatTimestamp(int timestamp) {
+    DateTime dt = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    DateTime localTime = dt.toLocal(); // Convert to local time
+    return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
   }
 
   List<FlSpot> getXSpots() {

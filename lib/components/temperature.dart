@@ -14,25 +14,32 @@ class TemperatureGraph extends StatefulWidget {
 
 class _TemperatureGraphState extends State<TemperatureGraph> {
   // handling database requests
+
   var db = MySqlServer();
-  List<Map<String, dynamic>> temperatureData = [];
+  List<Map<String, dynamic>> allData = [];
 
   DateTime selectedDate = DateTime.now();
 
-  void getTemp() {
+  void getAllData() {
     db.getConnection().then((conn) {
-      String sql = 'select Timestamp, Temperature from IOT';
+      String sql = 'SELECT Timestamp, Temperature, Humidity, X, Y, Z FROM IOT';
       conn.query(sql).then((results) {
-        List<Map<String, dynamic>> tempData = [];
+        List<Map<String, dynamic>> data = [];
         for (var row in results) {
           Map<String, dynamic> rowData = {
             'Timestamp': row['Timestamp'],
             'Temperature': row['Temperature'],
+            'Humidity': row['Humidity'],
+            'X': row['X'],
+            'Y': row['Y'],
+            'Z': row['Z'],
           };
-          tempData.add(rowData);
+          data.add(rowData);
         }
+        // new
+        data.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
         setState(() {
-          temperatureData = tempData;
+          allData = data;
         });
       });
     });
@@ -40,7 +47,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
 
   @override
   void initState() {
-    getTemp();
+    getAllData();
     super.initState();
   }
 
@@ -48,7 +55,6 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: blackColor,
@@ -71,21 +77,51 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
               ),
             ),
             SizedBox(height: screenWidth * 0.1),
-
-            // graph
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              height: 500,
+              height: screenHeight * 0.4,
               child: LineChart(
                 LineChartData(
-                  minY: 0,
-                  maxY: 50,
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                        drawBelowEverything: true,
+                        axisNameSize: 20,
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) {
+                            return RotatedBox(
+                              quarterTurns: 3,
+                              child: Text(
+                                formatTimestamp(value.toInt()),
+                                style: TextStyle(fontSize: screenWidth * 0.015),
+                              ),
+                            );
+                          },
+                        )),
+                    topTitles: AxisTitles(
+                        drawBelowEverything: true,
+                        axisNameSize: 20,
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) {
+                            return RotatedBox(
+                              quarterTurns: 3,
+                              child: Text(
+                                formatTimestamp(value.toInt()),
+                                style: TextStyle(fontSize: screenWidth * 0.015),
+                              ),
+                            );
+                          },
+                        )),
+                  ),
                   lineBarsData: [
                     LineChartBarData(
-                      spots: getSpots(),
+                      spots: getTemperatureSpots(),
                       isCurved: true,
-                      color: Colors.blue,
+                      color: Colors.blue, // Set the color for Temperature line
                       dotData: const FlDotData(show: true),
                     ),
                   ],
@@ -95,8 +131,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
             DatePickerWidget(
               onDateChanged: (DateTime date) {
                 // Filter data based on the selected date
-                List<Map<String, dynamic>> filteredData =
-                    temperatureData.where((data) {
+                List<Map<String, dynamic>> filteredData = allData.where((data) {
                   DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
                       data['Timestamp'] * 1000);
                   return dataDate.year == date.year &&
@@ -105,7 +140,7 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
                 }).toList();
                 setState(() {
                   selectedDate = date;
-                  temperatureData = filteredData;
+                  allData = filteredData;
                 });
               },
             ),
@@ -115,11 +150,17 @@ class _TemperatureGraphState extends State<TemperatureGraph> {
     );
   }
 
-  List<FlSpot> getSpots() {
+  String formatTimestamp(int timestamp) {
+    DateTime dt = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    DateTime localTime = dt.toLocal(); // Convert to local time
+    return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  List<FlSpot> getTemperatureSpots() {
     List<FlSpot> spots = [];
-    for (int i = 0; i < temperatureData.length; i++) {
-      double x = i.toDouble(); // Use the index as x-value
-      double y = temperatureData[i]['Temperature'].toDouble();
+    for (int i = 0; i < allData.length; i++) {
+      double x = allData[i]['Timestamp'].toDouble();
+      double y = allData[i]['Temperature'].toDouble();
       spots.add(FlSpot(x, y));
     }
     return spots;
