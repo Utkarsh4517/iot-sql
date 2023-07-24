@@ -14,26 +14,32 @@ class HumidityGraph extends StatefulWidget {
 
 class _HumidityGraphState extends State<HumidityGraph> {
   // handling database requests
+
   var db = MySqlServer();
-  List<Map<String, dynamic>> humidityData = [];
+  List<Map<String, dynamic>> allData = [];
 
   DateTime selectedDate = DateTime.now();
 
-  void getHumidity() {
+  void getAllData() {
     db.getConnection().then((conn) {
-      String sql = 'select Timestamp, Humidity from IOT';
+      String sql = 'SELECT Timestamp, Temperature, Humidity, X, Y, Z FROM IOT';
       conn.query(sql).then((results) {
-        List<Map<String, dynamic>> humiData = [];
+        List<Map<String, dynamic>> data = [];
         for (var row in results) {
           Map<String, dynamic> rowData = {
             'Timestamp': row['Timestamp'],
+            'Temperature': row['Temperature'],
             'Humidity': row['Humidity'],
+            'X': row['X'],
+            'Y': row['Y'],
+            'Z': row['Z'],
           };
-          humiData.add(rowData);
+          data.add(rowData);
         }
-        humiData.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
+        // new
+        data.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
         setState(() {
-          humidityData = humiData;
+          allData = data;
         });
       });
     });
@@ -41,7 +47,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
 
   @override
   void initState() {
-    getHumidity();
+    getAllData();
     super.initState();
   }
 
@@ -62,7 +68,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
               margin: EdgeInsets.all(screenWidth * 0.06),
               alignment: Alignment.centerLeft,
               child: GradientText(
-                'Humidity vs Time',
+                'Humidity Vs Time',
                 colors: const [Colors.red, Colors.redAccent, Colors.purple],
                 style: TextStyle(
                     fontFamily: 'Lexend',
@@ -71,12 +77,10 @@ class _HumidityGraphState extends State<HumidityGraph> {
               ),
             ),
             SizedBox(height: screenWidth * 0.1),
-
-            // graph
             Container(
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              height: 500,
+              height: screenHeight * 0.5,
               child: LineChart(
                 LineChartData(
                   titlesData: FlTitlesData(
@@ -113,13 +117,12 @@ class _HumidityGraphState extends State<HumidityGraph> {
                           },
                         )),
                   ),
-                  minY: 20,
-                  maxY: 100,
                   lineBarsData: [
                     LineChartBarData(
-                      spots: getSpots(),
+                      spots: getHumiditySpots(),
                       isCurved: true,
-                      color: Colors.blue,
+                      color: Colors
+                          .deepPurple, // Set the color for Temperature line
                       dotData: const FlDotData(show: true),
                     ),
                   ],
@@ -129,8 +132,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
             DatePickerWidget(
               onDateChanged: (DateTime date) {
                 // Filter data based on the selected date
-                List<Map<String, dynamic>> filteredData =
-                    humidityData.where((data) {
+                List<Map<String, dynamic>> filteredData = allData.where((data) {
                   DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
                       data['Timestamp'] * 1000);
                   return dataDate.year == date.year &&
@@ -139,7 +141,7 @@ class _HumidityGraphState extends State<HumidityGraph> {
                 }).toList();
                 setState(() {
                   selectedDate = date;
-                  humidityData = filteredData;
+                  allData = filteredData;
                 });
               },
             ),
@@ -149,17 +151,17 @@ class _HumidityGraphState extends State<HumidityGraph> {
     );
   }
 
- String formatTimestamp(int timestamp) {
+  String formatTimestamp(int timestamp) {
     DateTime dt = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     DateTime localTime = dt.toLocal(); // Convert to local time
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
   }
 
-  List<FlSpot> getSpots() {
+  List<FlSpot> getHumiditySpots() {
     List<FlSpot> spots = [];
-    for (int i = 0; i < humidityData.length; i++) {
-      double x = i.toDouble(); // Use the index as x-value
-      double y = humidityData[i]['Humidity'].toDouble();
+    for (int i = 0; i < allData.length; i++) {
+      double x = allData[i]['Timestamp'].toDouble();
+      double y = allData[i]['Humidity'].toDouble();
       spots.add(FlSpot(x, y));
     }
     return spots;
