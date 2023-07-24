@@ -17,28 +17,34 @@ class _CombinedGraphState extends State<CombinedGraph> {
 
   var db = MySqlServer();
   List<Map<String, dynamic>> allData = [];
-
   DateTime selectedDate = DateTime.now();
 
-  void getAllData() {
+  void getDataForDate(DateTime date) {
     db.getConnection().then((conn) {
       String sql = 'SELECT Timestamp, Temperature, Humidity, X, Y, Z FROM IOT';
       conn.query(sql).then((results) {
         List<Map<String, dynamic>> data = [];
         for (var row in results) {
-          Map<String, dynamic> rowData = {
-            'Timestamp': row['Timestamp'],
-            'Temperature': row['Temperature'],
-            'Humidity': row['Humidity'],
-            'X': row['X'],
-            'Y': row['Y'],
-            'Z': row['Z'],
-          };
-          data.add(rowData);
+          DateTime dataDate =
+              DateTime.fromMillisecondsSinceEpoch(row['Timestamp'] * 1000);
+
+          if (dataDate.year == date.year &&
+              dataDate.month == date.month &&
+              dataDate.day == date.day) {
+            Map<String, dynamic> rowData = {
+              'Timestamp': row['Timestamp'],
+              'Temperature': row['Temperature'],
+              'Humidity': row['Humidity'],
+              'X': row['X'],
+              'Y': row['Y'],
+              'Z': row['Z'],
+            };
+            data.add(rowData);
+          }
         }
-        // new
-        data.sort((a, b) => a['Timestamp'].compareTo(b['Timestamp']));
+
         setState(() {
+          selectedDate = date;
           allData = data;
         });
       });
@@ -47,7 +53,6 @@ class _CombinedGraphState extends State<CombinedGraph> {
 
   @override
   void initState() {
-    getAllData();
     super.initState();
   }
 
@@ -165,18 +170,7 @@ class _CombinedGraphState extends State<CombinedGraph> {
             ),
             DatePickerWidget(
               onDateChanged: (DateTime date) {
-                // Filter data based on the selected date
-                List<Map<String, dynamic>> filteredData = allData.where((data) {
-                  DateTime dataDate = DateTime.fromMillisecondsSinceEpoch(
-                      data['Timestamp'] * 1000);
-                  return dataDate.year == date.year &&
-                      dataDate.month == date.month &&
-                      dataDate.day == date.day;
-                }).toList();
-                setState(() {
-                  selectedDate = date;
-                  allData = filteredData;
-                });
+                getDataForDate(date);
               },
             ),
           ],
